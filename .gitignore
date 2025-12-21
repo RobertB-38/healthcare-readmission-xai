@@ -1,0 +1,43 @@
+# MIMIC-IV Data - NEVER COMMIT (HIPAA violation)
+data/raw/
+*.csv
+*.parquet
+*.pkl
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.ipynb_checkpoints/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+*.json
+*.key
+credentials/
+.env
+
+# Large files
+*.h5
+*.hdf5
+models/*.pkl
+models/*.joblib
+
+# Temporary
+tmp/
+temp/
+*.log
