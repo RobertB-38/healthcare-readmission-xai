@@ -12,6 +12,25 @@ Predicting hospital readmissions (30/60/90 days) using machine learning with exp
 **Dataset:** MIMIC-IV v3.1 (364,627 patients, 431,231 admissions)  
 **Target:** AUROC ≥ 0.75 with clinically meaningful explanations
 
+## Research Questions
+
+**RQ1: Prediction Performance**
+Can we predict 30-day hospital readmission using ensemble methods (Random Forest, XGBoost) with AUROC >0.80?
+
+**RQ2: Neural Network Comparison**
+Do LSTM neural networks with attention mechanisms improve prediction accuracy over traditional ML approaches?
+
+**RQ3: Feature Importance**
+Which clinical features (demographics, comorbidities, lab values, medications, historical admission patterns) are most predictive of readmission using SHAP and LIME explainability methods?
+
+**RQ4: Clinical Validation**
+Can SHAP/LIME identified risk factors be validated against existing clinical literature on readmission predictors?
+
+**RQ5: Model Interpretability**
+Can neural networks be made explainable using SHAP/LIME, proving they are not "black boxes"?
+
+**Secondary Question**: Can we also predict length of stay as an alternative utilitarian metric?
+
 ## Project Structure
 ```
 ├── sql/                          # BigQuery SQL queries
@@ -123,6 +142,48 @@ Location: `sql/03_feature_engineering/`
 7. Explainability analysis (SHAP, LIME)
 8. Clinical validation of model insights
 
+---
+
+## Patient Tracking Across Admissions
+
+MIMIC-IV enables longitudinal patient tracking through:
+- `subject_id`: Unique patient identifier (preserved across all admissions)
+- `hadm_id`: Unique hospital admission identifier
+- Dates shifted 100+ years for anonymization BUT temporal ordering preserved
+- Historical features calculated using `subject_id` to track same patient across multiple visits
+- Implemented in Query 6 (`06_historical_features.sql`)
+
+This allows us to:
+- Calculate prior admission counts (30/60/365 day windows)
+- Identify "frequent flyer" patients (3+ prior admissions)
+- Measure days since last discharge
+
+---
+
+## Modeling Strategy (Per Supervisor Feedback)
+
+### Phase 1: Baseline ML Models
+1. Logistic Regression (interpretable baseline)
+2. XGBoost (state-of-the-art ensemble method)
+3. Class imbalance handling (SMOTE, cost-sensitive learning)
+4. SHAP explainability analysis
+
+### Phase 2: Neural Networks
+1. LSTM with attention mechanisms
+2. Compare performance to baseline models
+3. SHAP explainability to prove interpretability (NOT a black box)
+
+### Phase 3: Comparative Analysis
+1. Model performance comparison (AUROC, AUPRC, sensitivity, specificity)
+2. Feature importance comparison across models
+3. Interpretability analysis (SHAP global + LIME local)
+4. Clinical validation against literature
+5. t-SNE visualization of patient clusters
+
+### Primary Target: 30-day readmission prediction
+### Secondary Analysis: Length of stay prediction (if time permits)
+
+---
 
 ## Contact
 
