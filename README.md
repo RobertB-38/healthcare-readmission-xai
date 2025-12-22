@@ -73,7 +73,7 @@ pip install -r requirements.txt
 
 ---
 
-## Phase 2: Feature Engineering ✅ COMPLETED
+## Phase 2: Feature Engineering: COMPLETED
 
 **Status**: Complete  
 **Completion Date**: December 22, 2024
@@ -130,7 +130,7 @@ Location: `sql/03_feature_engineering/`
 
 ---
 
-## Phase 3: Model Development 🚧 IN PROGRESS
+## Phase 3: Model Development: IN PROGRESS
 
 **Next Steps**:
 1. Python environment setup & EDA
