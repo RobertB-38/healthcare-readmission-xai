@@ -51,7 +51,7 @@ Can neural networks be made explainable using SHAP/LIME, proving they are not "b
 - [x] Initial Data Exploration
 - [x] Cohort Definition (406,031 admissions, 17.43% readmission rate)
 - [x] Panel Presentation Approval
-- [ ] Feature Engineering
+- [x] Feature Engineering
 - [ ] Model Development
 - [ ] Explainability Analysis
 
