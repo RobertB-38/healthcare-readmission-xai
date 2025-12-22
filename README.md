@@ -3,7 +3,7 @@
 **MSc Computing (Data Analytics) - DCU - 2025-26**  
 **Author:** Robert Borkar  
 **Collaborator:** Niket  
-**Supervisor:** Dr. Mohammed Amine Togou
+**Supervisor:** Prof Martin Crane
 
 ## Project Overview
 
