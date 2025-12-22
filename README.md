@@ -52,7 +52,80 @@ pip install -r requirements.txt
 - **Readmission rate:** 17.43%
 - **Exclusions:** Deaths, pediatric (<18), short stays (<24h), elective admissions
 
+---
+
+## Phase 2: Feature Engineering ✅ COMPLETED
+
+**Status**: Complete  
+**Completion Date**: December 22, 2024
+
+### Features Extracted (6 Categories, ~50 Features)
+
+1. **Demographics (13 features)**
+   - Age, gender, race, marital status, language
+   - Insurance type, admission type/location
+   - Length of stay (hours, days)
+
+2. **Comorbidities (10 features)**
+   - Total diagnosis count
+   - Charlson Comorbidity Index: MI, CHF, PVD, CVD, Dementia, COPD, Diabetes, CKD, Cancer
+
+3. **Lab Values (13 features)**
+   - Total lab tests and abnormal count (first 24h)
+   - Critical values: hemoglobin, WBC, creatinine, sodium, potassium, glucose
+
+4. **Medications (6 features)**
+   - Total medication count, polypharmacy flag
+   - High-risk flags: anticoagulants, insulin, opioids, antibiotics
+
+5. **Historical Admissions (7 features)**
+   - Prior admissions (30/90/365 day windows)
+   - Days since last discharge, total lifetime admissions
+   - Recent admission flag, frequent flyer flag
+
+6. **Target Variables (4 features)**
+   - Days to next admission
+   - Readmission flags: 30/60/90 day windows
+
+### Final Dataset
+- **Rows**: 406,031 hospital admissions
+- **Features**: ~50 (demographics + clinical + target)
+- **File**: `data/processed/mimic_readmission_final.csv`
+- **30-day Readmission Rate**: 17.43%
+
+### SQL Queries
+Location: `sql/03_feature_engineering/`
+1. `01_demographics_features.sql`
+2. `02_comorbidity_features.sql`
+3. `03_target_variable_readmission.sql`
+4. `04_lab_values_features.sql`
+5. `05_medication_features.sql`
+6. `06_historical_features.sql`
+7. `07_final_merged_dataset.sql` (master merge)
+
+### Key Findings
+- **Polypharmacy is universal**: 98% of patients on >5 medications
+- **Historical patterns strongest predictor**: Patients with prior 30-day admissions have extreme readmission risk
+- **Frequent flyers identified**: Some patients with 6+ consecutive readmissions
+- **Lab abnormalities vary widely**: 0-150+ abnormal tests in first 24 hours
+
+---
+
+## Phase 3: Model Development 🚧 IN PROGRESS
+
+**Next Steps**:
+1. Python environment setup & EDA
+2. Data preprocessing (missing values, encoding, scaling)
+3. Temporal train/validation/test splits
+4. Baseline models (Random Forest, XGBoost)
+5. Neural networks with attention mechanisms
+6. Class imbalance handling (SMOTE variants, cost-sensitive learning)
+7. Explainability analysis (SHAP, LIME)
+8. Clinical validation of model insights
+
+
 ## Contact
 
-Robert Borkar - robert.borkar2@mail.dcu.ie
-Niket Ahire - niketsuresh.ahire2@mail.dcu.ie
+1. Robert Borkar - robert.borkar2@mail.dcu.ie
+2. Niket Ahire - niketsuresh.ahire2@mail.dcu.ie
+
