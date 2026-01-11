@@ -45,40 +45,30 @@ Can neural networks be made explainable using SHAP/LIME, proving they are not "b
 └── docs/                         # Documentation and reports
 ```
 
-## Current Status
+## Project Timeline
 
-- [x] CITI Training & MIMIC-IV Access
-- [x] Initial Data Exploration
-- [x] Cohort Definition (406,031 admissions, 17.43% readmission rate)
-- [x] Panel Presentation Approval
-- [x] Feature Engineering
-- [ ] Model Development
-- [ ] Explainability Analysis
+### Phase 1: Data Access & Exploration(COMPLETE)
+**Completed:** October-November 2024
 
-## Quick Start
-```bash
-# Clone repository
-git clone https://gitlab.computing.dcu.ie/robert.borkar2/hospital-re-admission.git
+- CITI training certification obtained
+- MIMIC-IV v3.1 access granted via PhysioNet
+- BigQuery workspace configured
+- Initial data exploration (364,627 patients, 431,231 admissions)
+- Cohort definition: 406,031 admissions meeting inclusion criteria
+- Readmission rate validated: 17.43% (30-day)
+- Panel presentation completed & approved
 
-# Install dependencies
-pip install -r requirements.txt
-```
-
-## Key Metrics (Cohort Definition)
-
-- **Total admissions:** 406,031
-- **30-day readmissions:** 70,791
-- **Readmission rate:** 17.43%
-- **Exclusions:** Deaths, pediatric (<18), short stays (<24h), elective admissions
+**Key Decisions:**
+- Exclusion criteria: Deaths, pediatric (<18), short stays (<24h)
+- Quality filters: Admissions >24 hours, readmissions >24 hours post-discharge
+- Temporal validation approach confirmed (no random splits)
 
 ---
 
-## Phase 2: Feature Engineering: COMPLETED
+### Phase 2: Feature Engineering(COMPLETE)
+**Completed:** December 2024
 
-**Status**: Complete  
-**Completion Date**: December 22, 2024
-
-### Features Extracted (6 Categories, ~50 Features)
+**Features Extracted:** ~50 features across 6 categories
 
 1. **Demographics (13 features)**
    - Age, gender, race, marital status, language
@@ -86,103 +76,114 @@ pip install -r requirements.txt
    - Length of stay (hours, days)
 
 2. **Comorbidities (10 features)**
+   - Charlson Comorbidity Index components
    - Total diagnosis count
-   - Charlson Comorbidity Index: MI, CHF, PVD, CVD, Dementia, COPD, Diabetes, CKD, Cancer
 
 3. **Lab Values (13 features)**
-   - Total lab tests and abnormal count (first 24h)
-   - Critical values: hemoglobin, WBC, creatinine, sodium, potassium, glucose
+   - Critical labs: hemoglobin, WBC, creatinine, sodium, potassium, glucose
+   - Abnormal test counts (first 24h)
 
 4. **Medications (6 features)**
-   - Total medication count, polypharmacy flag
-   - High-risk flags: anticoagulants, insulin, opioids, antibiotics
+   - Polypharmacy flags
+   - High-risk categories: anticoagulants, insulin, opioids, antibiotics
 
 5. **Historical Admissions (7 features)**
    - Prior admissions (30/90/365 day windows)
-   - Days since last discharge, total lifetime admissions
-   - Recent admission flag, frequent flyer flag
+   - Days since last discharge
+   - Frequent flyer identification
 
 6. **Target Variables (4 features)**
-   - Days to next admission
    - Readmission flags: 30/60/90 day windows
 
-### Final Dataset
-- **Rows**: 406,031 hospital admissions
-- **Features**: ~50 (demographics + clinical + target)
-- **File**: `data/processed/mimic_readmission_final.csv`
-- **30-day Readmission Rate**: 17.43%
+**SQL Queries:** `sql/03_feature_engineering/` (01-07)
 
-### SQL Queries
-Location: `sql/03_feature_engineering/`
-1. `01_demographics_features.sql`
-2. `02_comorbidity_features.sql`
-3. `03_target_variable_readmission.sql`
-4. `04_lab_values_features.sql`
-5. `05_medication_features.sql`
-6. `06_historical_features.sql`
-7. `07_final_merged_dataset.sql` (master merge)
+**Output Dataset:**
+- File: `data/processed/mimic_readmission_final.csv`
+- Rows: 406,031 admissions
+- Features: ~50 variables
+- Size: 96MB
 
-### Key Findings
-- **Polypharmacy is universal**: 98% of patients on >5 medications
-- **Historical patterns strongest predictor**: Patients with prior 30-day admissions have extreme readmission risk
-- **Frequent flyers identified**: Some patients with 6+ consecutive readmissions
-- **Lab abnormalities vary widely**: 0-150+ abnormal tests in first 24 hours
+**Key Findings:**
+- 98% patients on >5 medications (polypharmacy universal)
+- Prior 30-day admissions = strongest readmission predictor
+- Frequent flyers identified (6+ consecutive readmissions)
+- Lab abnormalities: 0-150+ in first 24 hours
 
 ---
 
-## Phase 3: Model Development: IN PROGRESS
+### Phase 3: Data Preprocessing & Validation(COMPLETE)
+**Completed:** January 11, 2026
 
-**Next Steps**:
-1. Python environment setup & EDA
-2. Data preprocessing (missing values, encoding, scaling)
-3. Temporal train/validation/test splits
-4. Baseline models (Random Forest, XGBoost)
-5. Neural networks with attention mechanisms
-6. Class imbalance handling (SMOTE variants, cost-sensitive learning)
-7. Explainability analysis (SHAP, LIME)
-8. Clinical validation of model insights
+**Missing Value Handling:**
+- Dropped target leakage features (`days_to_next_admission`)
+- Lab values: Median imputation (clinical standard)
+- Categorical: Mode/UNKNOWN imputation
+- Historical features: -1 for first-time patients
+- **Result:** 0 missing values
+
+**Train/Test Split:**
+- **Method:** Temporal split (80/20)
+- **Split date:** 2179-02-08
+- **Train:** 324,824 admissions (17.32% readmission)
+- **Test:** 81,207 admissions (17.90% readmission)
+- **Patient overlap:** 2.03% (acceptable for temporal split)
+
+**Data Quality Validation:**
+- No target leakage  
+- Temporal ordering preserved (train on past, test on future)  
+- Class balance maintained across splits (±0.6%)  
+- Minimal patient overlap between sets  
+
+**Outputs:**
+- `data/processed/train_data_clean.csv` (324K rows)
+- `data/processed/test_data_clean.csv` (81K rows)
 
 ---
 
-## Patient Tracking Across Admissions
+### Phase 4: Model Development(IN PROGRESS)
+**Started:** January 11, 2026
 
-MIMIC-IV enables longitudinal patient tracking through:
-- `subject_id`: Unique patient identifier (preserved across all admissions)
-- `hadm_id`: Unique hospital admission identifier
-- Dates shifted 100+ years for anonymization BUT temporal ordering preserved
-- Historical features calculated using `subject_id` to track same patient across multiple visits
-- Implemented in Query 6 (`06_historical_features.sql`)
+#### Current Status: Exploratory Data Analysis
 
-This allows us to:
-- Calculate prior admission counts (30/60/365 day windows)
-- Identify "frequent flyer" patients (3+ prior admissions)
-- Measure days since last discharge
+**Next Steps (Week 1-2):**
+1. EDA: Feature distributions, correlations, target analysis
+2. Baseline models: Logistic Regression, XGBoost
+3. Performance metrics: AUROC, AUPRC, calibration
+4. Class imbalance techniques: SMOTE, cost-sensitive learning
+
+**Upcoming (Week 3-4):**
+- LSTM + Attention architecture
+- Multi-window predictions (30/60/90 days)
+- Explainability integration (SHAP, LIME)
+
+**Modeling Strategy:**
+```
+Baseline Models → Neural Networks → Explainability → Clinical Validation
+     ↓                   ↓                ↓                  ↓
+  XGBoost          LSTM+Attention       SHAP/LIME      Literature Review
+  LogReg           Temporal Patterns    Feature Ranks   Clinical Validity
+```
 
 ---
 
-## Modeling Strategy (Per Supervisor Feedback)
+### Phase 5: Explainability & Validation(PLANNED)
+**Target:** February-March 2026
 
-### Phase 1: Baseline ML Models
-1. Logistic Regression (interpretable baseline)
-2. XGBoost (state-of-the-art ensemble method)
-3. Class imbalance handling (SMOTE, cost-sensitive learning)
-4. SHAP explainability analysis
+- SHAP global feature importance
+- LIME local patient explanations
+- t-SNE patient clustering
+- Clinical literature validation
+- Model comparison analysis
 
-### Phase 2: Neural Networks
-1. LSTM with attention mechanisms
-2. Compare performance to baseline models
-3. SHAP explainability to prove interpretability (NOT a black box)
+---
 
-### Phase 3: Comparative Analysis
-1. Model performance comparison (AUROC, AUPRC, sensitivity, specificity)
-2. Feature importance comparison across models
-3. Interpretability analysis (SHAP global + LIME local)
-4. Clinical validation against literature
-5. t-SNE visualization of patient clusters
+### Phase 6: Final Report & Presentation(PLANNED)
+**Target:** April 2026
 
-### Primary Target: 30-day readmission prediction
-### Secondary Analysis: Length of stay prediction (if time permits)
-
+- Technical report writing
+- Results visualization
+- Presentation preparation
+- Code/documentation finalization
 ---
 
 ## Contact
