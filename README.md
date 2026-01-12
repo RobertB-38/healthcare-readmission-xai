@@ -66,7 +66,7 @@ Can neural networks be made explainable using SHAP/LIME, proving they are not "b
 ---
 
 ### Phase 2: Feature Engineering(COMPLETE)
-**Completed:** December 2024
+**Completed:** December, 2024
 
 **Features Extracted:** ~50 features across 6 categories
 
@@ -112,7 +112,7 @@ Can neural networks be made explainable using SHAP/LIME, proving they are not "b
 ---
 
 ### Phase 3: Data Preprocessing & Validation(COMPLETE)
-**Completed:** January 11, 2026
+**Completed:** January 3, 2026
 
 **Missing Value Handling:**
 - Dropped target leakage features (`days_to_next_admission`)
@@ -137,7 +137,26 @@ Can neural networks be made explainable using SHAP/LIME, proving they are not "b
 **Outputs:**
 - `data/processed/train_data_clean.csv` (324K rows)
 - `data/processed/test_data_clean.csv` (81K rows)
+---
 
+### Dataset Statistics
+
+![Dataset Summary](results/01_dataset_summary.png)
+
+**Key Metrics:**
+- Total admissions: 406,031
+- Unique patients: ~183K
+- Features: 50
+- Train/Test split: 324,824 / 81,207 (80/20 temporal)
+- Readmission rate: Train 17.32%, Test 17.90%
+- Patient overlap: 2.03% (acceptable for temporal split)
+- Missing values: 0 (all imputed using clinical standards)
+
+**Data Quality Assurance:**
+- Temporal validation (train on past, test on future)  
+- No target leakage  
+- Minimal patient overlap between sets  
+- Class balance maintained across splits
 ---
 
 ### Phase 4: Model Development(IN PROGRESS)
