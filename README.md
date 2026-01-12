@@ -162,18 +162,19 @@ Can neural networks be made explainable using SHAP/LIME, proving they are not "b
 ### Phase 4: Model Development(IN PROGRESS)
 **Started:** January 11, 2026
 
-#### Current Status: Exploratory Data Analysis
+#### Current Status: Baseline Models
 
-**Next Steps (Week 1-2):**
-1. EDA: Feature distributions, correlations, target analysis
-2. Baseline models: Logistic Regression, XGBoost
-3. Performance metrics: AUROC, AUPRC, calibration
-4. Class imbalance techniques: SMOTE, cost-sensitive learning
+**Completed:**
+- Exploratory Data Analysis (age, comorbidities, historical admissions, lab values)
+- Feature correlation analysis (top predictors identified)
 
-**Upcoming (Week 3-4):**
+**In Progress:**
+- Baseline model training (Logistic Regression, XGBoost)
+
+**Next Steps:**
+- AUROC/AUPRC evaluation
+- Class imbalance handling (SMOTE, cost-sensitive learning)
 - LSTM + Attention architecture
-- Multi-window predictions (30/60/90 days)
-- Explainability integration (SHAP, LIME)
 
 **Modeling Strategy:**
 ```
