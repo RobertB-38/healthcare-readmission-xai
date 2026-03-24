@@ -64,7 +64,7 @@ Predicting 30-day hospital readmissions using machine learning with explainable 
 
 ## Project Timeline
 
-### Phase 1: Data Access & Exploration ✅
+### Phase 1: Data Access & Exploration (Done)
 **Completed:** October-November 2025
 
 - MIMIC-IV v3.1 access via PhysioNet/BigQuery
@@ -78,7 +78,7 @@ Predicting 30-day hospital readmissions using machine learning with explainable 
 
 ---
 
-### Phase 2: Feature Engineering ✅
+### Phase 2: Feature Engineering (Done)
 **Completed:** December 2025
 
 50 features across 6 categories: demographics, comorbidities (Charlson Index), lab values, medications, historical admission patterns, target variables.
@@ -89,7 +89,7 @@ SQL queries: `sql/03_feature_engineering/` (01-07)
 
 ---
 
-### Phase 3: Data Preprocessing & Validation ✅
+### Phase 3: Data Preprocessing & Validation (Done)
 **Completed:** January 2026
 
 - Missing value imputation: median for labs, 0 for historical features, UNKNOWN for categoricals
@@ -99,7 +99,7 @@ SQL queries: `sql/03_feature_engineering/` (01-07)
 
 ---
 
-### Phase 4: Model Development ✅
+### Phase 4: Model Development (Done)
 **Completed:** March 2026
 
 **Baseline Models** (`03_baseline_models.ipynb`, `04_xgboost_tuning.ipynb`):
@@ -122,7 +122,7 @@ SQL queries: `sql/03_feature_engineering/` (01-07)
 
 ---
 
-### Phase 5: Explainability & Clinical Validation 🔄
+### Phase 5: Explainability & Clinical Validation 
 **Target:** May 2026
 
 - SHAP global feature importance across all three model types (RQ1)
@@ -133,7 +133,7 @@ SQL queries: `sql/03_feature_engineering/` (01-07)
 
 ---
 
-### Phase 6: Thesis Writing & Submission 🔄
+### Phase 6: Thesis Writing & Submission 
 **Target:** May-July 2026
 
 ---
