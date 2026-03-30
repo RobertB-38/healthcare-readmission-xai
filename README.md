@@ -1,9 +1,8 @@
 # Healthcare Readmission Risk Prediction Using Explainable AI
 
 **MSc Computing (Data Analytics) - DCU - 2025-26**  
-**Author:** Robert Borkar  
-**Collaborator:** Niket  
-**Supervisor:** Prof Martin Crane
+**Authors:** Robert Borkar & Niket Ahire 
+**Supervisor:** Prof. Martin Crane
 
 ## Project Overview
 
