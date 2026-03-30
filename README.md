@@ -2,6 +2,7 @@
 
 **MSc Computing (Data Analytics) - DCU - 2025-26**  
 **Authors:** Robert Borkar & Niket Ahire 
+
 **Supervisor:** Prof. Martin Crane
 
 ## Project Overview
