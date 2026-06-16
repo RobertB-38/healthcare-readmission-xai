@@ -1,151 +1,112 @@
-# Healthcare Readmission Risk Prediction Using Explainable AI
+# Healthcare Readmission Risk: Prediction and Trustworthy Explanations
 
-**MSc Computing (Data Analytics) - DCU - 2025-26**  
-**Author:** Robert Borkar  
-**Collaborator:** Niket Ahire  
-**Supervisor:** Prof Martin Crane
+Predicting 30/60/90-day hospital readmission on MIMIC-IV, and a framework for deciding which explanation of those predictions a clinician should actually trust.
 
-## Project Overview
+**Author:** Robert Borkar
+**Collaborator:** Niket Ahire
+**Supervisor:** Prof Martin Crane (DCU). Supervision continues with Prof Mark Roantree from June 2026.
+**Context:** MSc Computing (Data Analytics), DCU, 2025-26
 
-Predicting 30-day hospital readmissions using machine learning with explainable AI techniques (SHAP, LIME) to provide clinical interpretability. The core contribution is a clinical validation framework that systematically validates whether SHAP/LIME explanations align with established medical literature.
-
-**Dataset:** MIMIC-IV v3.1 via Google BigQuery (406,031 admissions, 17.43% 30-day readmission rate)  
-**Target:** AUROC ≥ 0.75 with clinically validated explanations
-
-> Note: Raw data files are not stored in this repository (MIMIC-IV data use agreement). Access MIMIC-IV v3.1 at https://physionet.org/content/mimiciv/
+> Note: raw data files are not stored here (MIMIC-IV data use agreement). Access MIMIC-IV v3.1 at https://physionet.org/content/mimiciv/. The pipeline regenerates everything from the source extract.
 
 ---
 
-## Research Questions
+## What this project is
 
-**RQ1:** How do SHAP and LIME explanations compare across Logistic Regression, XGBoost, and LSTM models for readmission prediction?
+Most readmission projects stop at "we trained a model and SHAP says feature X matters." The problem is that different explanation methods often disagree about feature X, and there is usually no way to tell which one to believe. This project tackles that directly.
 
-**RQ2:** Can a clinical validation framework systematically verify that XAI outputs align with established medical literature on readmission risk factors?
+We train readmission models on MIMIC-IV, then build a framework that scores each explanation on three things and uses them to pick the trustworthy one:
 
-**RQ3:** How does class imbalance handling affect the stability and reliability of SHAP/LIME explanations?
+1. **Fidelity** - does the explanation actually reflect what the model does?
+2. **Plausibility** - do the features it highlights match what clinical literature says drives readmission?
+3. **Disagreement** - do the different methods (SHAP, LIME) even agree with each other?
 
-**RQ4:** Can t-SNE visualisations integrated with SHAP feature importance reveal clinically meaningful patient risk clusters?
-
----
-
-## Current Model Results
-
-| Model | Test AUROC |
-|---|---|
-| Logistic Regression (baseline) | 0.7021 |
-| LR + Class Weights | 0.7025 |
-| LR + SMOTE | 0.6984 |
-| XGBoost (tuned, 30-iter RandomizedSearchCV) | 0.7197 |
-| LSTM + Bahdanau Attention (initial) | 0.6951 |
-| **Target** | **0.7500** |
+When the methods disagree, fidelity and plausibility decide which explanation wins. We run the whole thing across three prediction windows (30, 60, 90 days) to check the answer is stable.
 
 ---
 
-## Project Structure
+## The main result
+
+Prediction performance sits at a data ceiling for a single-site extract, so the contribution is not the AUROC. It is the explanation framework and what it tells us.
+
+| Window | Readmission rate | Test AUROC |
+|--------|------------------|------------|
+| 30 days | ~18% | ~0.72 |
+| 60 days | ~25% | ~0.73 |
+| 90 days | ~29% | ~0.74 |
+
+AUROC around 0.72 on a single-site MIMIC-IV cohort is in line with what the data supports. Chasing a higher number on this extract is not the point. The interesting finding is in the explanations:
+
+- The two SHAP variants (TreeSHAP, KernelSHAP) agree strongly, which confirms the pipeline is sound.
+- SHAP and LIME disagree a lot. They often pick different top features, sometimes in opposite directions.
+- On fidelity and clinical direction, SHAP scores roughly 0.75-0.88, LIME around 0.24-0.36.
+- So for this model, SHAP gives the more trustworthy explanation, and that holds at every window.
+
+In short: SHAP and LIME do not tell the same story here, and the framework gives a principled reason to trust SHAP over LIME.
+
+---
+
+## Methods and stack
+
+- **Models:** XGBoost (final model), LightGBM, BiLSTM with Bahdanau attention, plus a fairness-constrained variant (FairGBM).
+- **Explainability:** TreeSHAP, KernelSHAP, LIME, and Integrated Gradients (on the neural model).
+- **Framework metrics:** faithfulness correlation and sparseness (fidelity), agreement against a literature-derived clinical reference set (plausibility), and Krishna et al.'s disagreement measures (cross-method).
+- **Validation:** chronological train/validation/test split (train on the past, test on the future) with an explicit leakage guard. No random splits.
+- **Fairness:** the final model keeps race as a feature; a with/without-race check showed near-identical AUROC (~0.70 either way), and FairGBM was added as a constrained variant.
+- **Data:** MIMIC-IV v3.1 via BigQuery, 406,031 admissions after inclusion criteria (~180K patients), ~45 engineered features across demographics, comorbidities (Charlson), labs, medications, and prior-admission history.
+
+---
+
+## Project status
+
+Where things stand as of June 2026.
+
+| Phase | Work | Status |
+|-------|------|--------|
+| 1 | Data access and cohort definition | Done (Oct-Nov 2025) |
+| 2 | Feature engineering (~45 features, 6 categories) | Done (Dec 2025) |
+| 3 | Preprocessing and chronological split | Done (Jan 2026) |
+| 4 | Models: LR, XGBoost, LightGBM, BiLSTM+attention, FairGBM | Done (Mar-May 2026) |
+| 5 | Explainability and clinical validation framework (SHAP, LIME, IG, t-SNE) | Done (Jun 2026) |
+| 6 | IEEE paper and viva | In progress (Jun-Aug 2026) |
+
+### Recent milestones
+
+- Caught and corrected train/test leakage. Moved to a strict chronological split with an integrity check, and dropped leakage columns. The headline AUROC went from 0.79 to an honest 0.72.
+- Built the three-axis trust framework. Verdict: trust SHAP over LIME, stable across the 30, 60 and 90 day windows.
+- Added Integrated Gradients on the BiLSTM as a cross-architecture check on the neural model.
+- Built t-SNE patient maps in both feature space and SHAP space.
+- Found that single-admission patients are structural non-readmissions (they can never be readmitted by construction). We report 0.72 on all patients and 0.68 on the two-plus-admission cohort as the honest robustness number.
+
+---
+
+## Project structure
 
 ```
-├── sql/                          # BigQuery SQL queries
-│   ├── 01_data_exploration/      # Initial dataset analysis
-│   ├── 02_cohort_definition/     # Inclusion/exclusion criteria
-│   └── 03_feature_engineering/   # Feature extraction queries
-├── notebooks/                    # Jupyter/Colab notebooks
-│   ├── 01_data_loading_and_split.ipynb
-│   ├── 02_exploratory_analysis.ipynb
-│   ├── 03_baseline_models.ipynb
-│   ├── 04_xgboost_tuning.ipynb
-│   └── 05_lstm_attention.ipynb
-├── Literature Review/            # Submitted literature review (IEEE format)
-├── models/                       # Trained model artifacts (local only, not in repo)
-├── results/                      # Figures, tables, performance metrics
-└── docs/                         # Documentation and reports
+sql/         BigQuery queries: cohort, feature engineering
+notebooks/   data prep, models, SHAP/LIME, fairness, the validation framework, IG, t-SNE
+src/         shared Python code
+results/     figures, metric tables, the clinical reference set
+docs/        notes and reports
 ```
 
----
-
-## Project Timeline
-
-### Phase 1: Data Access & Exploration (Done)
-**Completed:** October-November 2025
-
-- MIMIC-IV v3.1 access via PhysioNet/BigQuery
-- Cohort definition: 406,031 admissions meeting inclusion criteria
-- Readmission rate validated: 17.43% (30-day)
-- Panel presentation completed and approved
-
-**Key decisions:**
-- Exclusion: deaths during admission, paediatric (<18), stays <24h
-- Temporal validation approach confirmed from the start
+Patient data, trained model files, and large caches are not committed (MIMIC licensing and size).
 
 ---
 
-### Phase 2: Feature Engineering (Done)
-**Completed:** December 2025
+## Roadmap (where this is going next)
 
-50 features across 6 categories: demographics, comorbidities (Charlson Index), lab values, medications, historical admission patterns, target variables.
+The thesis version ends at the validation framework. Beyond that, I am taking this further as a personal project toward a deployable system:
 
-**Key finding:** Prior admission counts are the strongest readmission predictor — consistent with LACE index (van Walraven et al., 2010, CMAJ).
-
-SQL queries: `sql/03_feature_engineering/` (01-07)
-
----
-
-### Phase 3: Data Preprocessing & Validation (Done)
-**Completed:** January 2026
-
-- Missing value imputation: median for labs, 0 for historical features, UNKNOWN for categoricals
-- Temporal train/test split (80/20, split date 2179-02-08)
-- Zero missing values, no target leakage confirmed
-- Train: 324,824 admissions | Test: 81,207 admissions
-
----
-
-### Phase 4: Model Development (Done)
-**Completed:** March 2026
-
-**Baseline Models** (`03_baseline_models.ipynb`, `04_xgboost_tuning.ipynb`):
-- Logistic Regression with three imbalance strategies (none, class weights, SMOTE)
-- XGBoost with 30-iteration RandomizedSearchCV hyperparameter tuning
-- Best baseline: XGBoost 0.7197 AUROC
-
-**LSTM + Attention** (`05_lstm_attention.ipynb`):
-- Bidirectional LSTM with Bahdanau attention mechanism
-- Full cohort with pre-padding for single-admission patients (no selection bias)
-- Chronological 70/15/15 train/val/test split — consistent with baseline methodology
-- Class weighting (4.69x) for imbalance handling
-- Early stopping and ReduceLROnPlateau callbacks
-- Initial test AUROC: 0.6951 — tuning in progress
-
-**Key architectural decisions:**
-- Race excluded as feature (production deployment ethics and clinical fairness)
-- Per-admission labelling to avoid data leakage
-- Sequence length capped at 10 (covers 95%+ of patients efficiently)
-
----
-
-### Phase 5: Explainability & Clinical Validation 
-**Target:** May 2026
-
-- SHAP global feature importance across all three model types (RQ1)
-- LIME local patient-level explanations
-- Clinical validation framework — validating explanations against LACE index, HOSPITAL score, comorbidity literature (RQ2)
-- Class imbalance effects on explanation stability (RQ3)
-- t-SNE patient clustering integrated with SHAP (RQ4)
-
----
-
-### Phase 6: Thesis Writing & Submission 
-**Target:** May-July 2026
-
----
-
-## Literature Review
-
-Submitted February 2026. IEEE double-column format, 3 pages, 11 references.  
-Available in `Literature Review/` directory.
+- Wrap the model and explanation framework behind an API.
+- A retrieval layer (RAG) over clinical guidelines so each explanation comes with grounded, cited context.
+- A small LLM agent that turns a patient's risk explanation into a readable clinician summary.
+- Cloud deployment with monitoring and drift checks.
+- Extend beyond readmission to length-of-stay as a second outcome.
 
 ---
 
 ## Contact
 
-- Robert Borkar — robert.borkar2@mail.dcu.ie
-- Niket Ahire — niketsuresh.ahire2@mail.dcu.ie
+- Robert Borkar - robert.borkar2@mail.dcu.ie
+- Niket Ahire - niketsuresh.ahire2@mail.dcu.ie
